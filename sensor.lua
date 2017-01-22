@@ -35,4 +35,14 @@ msElapsed = 0
 SENSEPIN = 1
 Ws = {}  -- init table of latest elapsed times so median can be taken
 enInt()
+
+-- set up i2c bus for adc and compass reads
+dofile("i2c.lua")
+id=0    -- bus
+sda=2   -- i2c data GPIO4
+scl=3   -- i2c clock GPIO0
+-- initialize i2c, set gpio4 as sda, gpio0 as scl
+i2c.setup(id,sda,scl,i2c.SLOW)
+dofile("readcompass.lua")   -- get compass read routines in
+dofile("getadc.lua")        -- get adc read routines in
 tmr.alarm( 2 , 2500 , 0 ,  function() require("tsclient") end)

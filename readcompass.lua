@@ -1,17 +1,10 @@
 -- read and convert HMX5883L magnetometer 
-dofile("i2c.lua")
-compass_adr=0x1E --HMC5883L
-id=0    -- bus
-sda=2   -- i2c data GPIO4
-scl=3   -- i2c clock GPIO0
+compass_adr=0x1E --HMC5883L address for i2c comms
 point={N,NE,E,SE,S,SW,W,NW}    
--- initialize i2c, set gpio4 as sda, gpio0 as scl
-i2c.setup(id,sda,scl,i2c.SLOW)
 -- set mode register to 00 = continuous update    
 write_i2c(compass_adr,0x02,0x00)
---  wait 100ms before trying to read compass (min 67ms)
--- tmr.alarm( 1 , 100, 0 , read_compass ) 
-   
+--  NB need 100ms before trying to read compass (min 67ms)
+  
 function reg2int(reg1, reg2)-- convert 2 hex bytes to 16 bit signed int
 num=bit.lshift(reg1,8)+reg2
 if num>2047 then num=num-65536 end

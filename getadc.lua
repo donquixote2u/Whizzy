@@ -1,20 +1,21 @@
--- reads 2 analogue voltages (Batt/Solar) via CD4051 switch
-CTLPIN=7        -- set GPIO13 as CD4051 (adc) enable/disable)
-ADRPIN=6        -- set GPIO12 as adc channel select (0 or 1)
-gpio.mode(CTLPIN, gpio.OUTPUT) -- set ctlpin output,high=disabled
-gpio.write(CTLPIN,1)           -- start with adc disabled 
-gpio.mode(ADRPIN, gpio.OUTPUT) -- set adrpin as output
-     
-if adc.force_init_mode(adc.INIT_ADC) then
-  node.restart()
-  return -- don't bother continuing, the restart is scheduled
-end
-
-function read_adc(adcinput) 
-    gpio.write(CTLPIN,0)  -- enable adc 
-    gpio.write(ADRPIN,adcinput)  -- select adr (0 or 1)
-    local volts=adc.read(0)     -- read 4051 output
-    gpio.write(CTLPIN,1)        -- disable adc 
-    return volts
-end
+-- reads 2 analogue voltages (Batt/Solar) via i2c from attiny85 adc
+att_adr=0x13 --attiny adc
+period=10000   -- allow time to check 2 sensors before xmit
+adc2delay=tmr.create()
+adc3delay=tmr.create()
+write_i2c(att_adr,0x00,2) -- write # of adc to be sampled into reg 0 to start sampling
+tmr.register(adc2delay,period,tmr.ALARM_SINGLE,function()
+     -- get reg 2 = adc2 = battery
+    PvVolts=string.format("%02d",string.byte(read_i2c(att_adr, 2, 1)))/25 
+    print("\r\n PvVolts="..PvVolts)
+    write_i2c(att_adr,0x00,3)
+    -- don;t start next sample until first done
+    tmr.register(adc3delay,period,tmr.ALARM_SINGLE,function()
+        -- get reg 3 = adc3 = panel
+        BattVolts=string.format("%02d",string.byte(read_i2c(att_adr, 3, 1)))/25 
+        print("\r\n BattVolts="..BattVolts)
+        end)
+    tmr.start(adc3delay)    
+    end)
+tmr.start(adc2delay)
 

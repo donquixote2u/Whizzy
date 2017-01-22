@@ -4,17 +4,15 @@
 TSADDR = "184.106.153.149"
 TSKEY="TIWBBVWTOW0KPWL0"
 Ws={} -- init table of stored latest windSpeed vals
-dofile("readcompass.lua")   -- get compass read routines in
-dofile("getadc.lua")        -- get adc read routines in
--- wait INTERVAL (less startup delays) to send data, send, then sleep
-tmr.alarm(2, INTERVAL-5000, 1, function() sendData() end )
+-- wait INTERVAL to send data, send, then sleep
+tmr.alarm(2, INTERVAL, 1, function() sendData() end )
 -- END --
 
 function sendData()
 print("\r\n sendData called")
 dofile("checkwifi.lua")
 if(CONNECTED~=true) then -- if not connected, resubmit call
-  tmr.alarm(1, 10000, 0, function() checkWIFI() end )
+  tmr.alarm(1, 5000, 0, function() checkWIFI() end )
 else  -- wifi connected, so send data
 if((Ws~=nil) and (#Ws>0)) then 
   table.sort(Ws)   -- sort elapsed times  and extract median
@@ -57,15 +55,10 @@ sk:on("sent",function(sck)
 --sk:on("disconnection", function(sck)
 --    collectgarbage();
 --    end)  
--- read adc, correction factor = ?       
-BattVolts = read_adc(0) / 120
-print("\r\n BattVolts="..BattVolts)
-PVVolts = read_adc(1) / 120
-print("\r\n PVvolts="..PVVolts)
 windSpeed=string.format("%04.1f",Speed)
 windDir=read_compass()
 print("\r\n WindDir="..windDir)
-TSPARMS="update?api_key="..TSKEY.."&field3="..windSpeed.."&field4="..windDir.."&field5="..PVVolts.."&field6="..BattVolts;
+TSPARMS="update?api_key="..TSKEY.."&field3="..windSpeed.."&field4="..windDir.."&field5="..PvVolts.."&field6="..BattVolts;
 REQBODY1= " HTTP/1.1\r\nHost: api.thingspeak.com\r\n";
 REQBODY2="Accept: */*\r\n".."User-Agent: Mozilla/4.0 (compatible; esp8266 Lua; Windows NT 5.1)\r\n\r\n"
 REQ="GET /"..TSPARMS..REQBODY1..REQBODY2;
