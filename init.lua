@@ -5,7 +5,7 @@
 SSID    = "98FM"
 APPWD   = "potentiometer"
 CMDFILE = "sensor.lua"   -- File that is executed after connection
-INTERVAL = 45000
+INTERVAL = 1200000
 THRESHOLD = 10000000
 CALIBRATION = 10000000
 -- Some control variables
