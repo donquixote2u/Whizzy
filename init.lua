@@ -2,8 +2,8 @@
 --(send wind speed/dir, batt and pv voltage levels to webserver)
 -- manifest: sensor,tsclient,readcompass,getadc,i2c,checkwifi
  -- Constants
-SSID    = "98FM"
-APPWD   = "potentiometer"
+SSID    = "SSID"
+APPWD   = "password"
 CMDFILE = "sensor.lua"   -- File that is executed after connection
 INTERVAL = 1200000
 THRESHOLD = 10000000
