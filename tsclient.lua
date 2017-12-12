@@ -64,7 +64,7 @@ sk:on("sent",function(sck)
 windSpeed=string.format("%04.1f",Speed)
 windDir=read_compass()
 print("\r\n WindDir="..windDir)
-TSPARMS="update?api_key="..TSKEY.."&field3="..windSpeed.."&field4="..windDir.."&field5="..PvVolts.."&field6="..BattVolts;
+TSPARMS="update?api_key="..TSKEY.."&field3="..windSpeed.."&field4="..windDir.."&field5="..BattVolts.."&field6="..PvVolts;
 REQBODY1= " HTTP/1.1\r\nHost: api.thingspeak.com\r\n";
 REQBODY2="Accept: */*\r\n".."User-Agent: Mozilla/4.0 (compatible; esp8266 Lua; Windows NT 5.1)\r\n\r\n"
 REQ="GET /"..TSPARMS..REQBODY1..REQBODY2;
