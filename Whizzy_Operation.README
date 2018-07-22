@@ -1,0 +1,31 @@
+WHIZZY OPERATION
+
+Whizzy operates on a fixed cycle of accumulating data, sending, and restarting.
+The length of the cycle is set by a parameter-driven timer.
+The restart is intended to minimise the possibility of a failed wifi connection demanding a manual reboot.
+
+The details of the cycle are as follows:
+
+I2C comms routines are loaded.
+
+compass read routines are loaded.
+
+windspeed turbine rotation detector (hall effect sensor)  interrupt set.
+(when fired, this interrupt triggers an update of speed calcs since the last trigger)
+
+Voltage readings are started on the attiny adc, and read from I2C registers 2.5 seconds later.
+
+Wifi connection routines are loaded
+
+The data transmission timer is set for 20 minutes, upon which:
+	the wifi connection is checked, and retried every 10 secs until success if not up
+	when up,	the data is prepared for sending:
+		the compass is read
+		the median windspeed is calculated from the last few readings
+		the data is sent to Thingspeek via http 
+		on sent,  Whizzy is restarted.
+		(it is supposed to be put to sleep for 1 sec and restarted with wifi radio off,
+			to save power, but this doesn't seem to be working)
+	
+	
+

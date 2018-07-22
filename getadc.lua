@@ -5,14 +5,14 @@ adc2delay=tmr.create()
 adc3delay=tmr.create()
 write_i2c(att_adr,0x00,2) -- write # of adc to be sampled into reg 0 to start sampling
 tmr.register(adc2delay,period,tmr.ALARM_SINGLE,function()
-     -- get reg 2 = adc2 = pv panels
-    PvVolts=string.format("%02d",string.byte(read_i2c(att_adr, 2, 1)))/25 
+     -- get reg 2 = adc3 = pv panels
+    PvVolts=string.format("%02d",string.byte(read_i2c(att_adr, 3, 1)))/1.5 
     print("\r\n PvVolts="..PvVolts)
     write_i2c(att_adr,0x00,3)
     -- don;t start next sample until first done
     tmr.register(adc3delay,period,tmr.ALARM_SINGLE,function()
-        -- get reg 3 = adc3 = panel
-        BattVolts=string.format("%02d",string.byte(read_i2c(att_adr, 3, 1)))/25 
+        -- get reg 3 = adc2 = battery
+        BattVolts=string.format("%02d",string.byte(read_i2c(att_adr, 2, 1)))/1.5
         print("\r\n BattVolts="..BattVolts)
         end)
     tmr.start(adc3delay)    
