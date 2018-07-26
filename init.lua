@@ -5,7 +5,8 @@
 SSID    = "SSID"
 APPWD   = "password"
 CMDFILE = "sensor.lua"   -- File that is executed after connection
-INTERVAL = 1200000
+-- INTERVAL = 1200000   -- delay before data send; 1200 millisecs=20 min
+INTERVAL = 60000   -- temp delay 1 minute
 THRESHOLD = 10000000
 CALIBRATION = 10000000
 -- Some control variables

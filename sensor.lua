@@ -44,6 +44,6 @@ scl=3   -- i2c clock GPIO0
 -- initialize i2c, set gpio4 as sda, gpio0 as scl
 i2c.setup(id,sda,scl,i2c.SLOW)
 dofile("readcompass.lua")   -- get compass read routines in
-dofile"getadc.lua")        -- get adc read routines in
+dofile("getadc.lua")        -- get adc read routines in
 -- now load thingspeak send routines, set up xmit loop
 tmr.alarm( 2 , 2500 , 0 ,  function() require("tsclient") end)

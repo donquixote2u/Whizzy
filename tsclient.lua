@@ -52,8 +52,8 @@ sk:on("sent",function(sck)
     wifi.sta.disconnect()
     enInt()
     -- go to sleep, wake up 30 secs before report due
-    local DELAY2 = ((INTERVAL/2)*1000)
-    -- local DELAY = 1000000  -- sleep 1 sec, 
+    -- local DELAY2 = ((INTERVAL/2)*1000)
+    local DELAY2 = 1000000  -- sleep 1 sec, 
     node.dsleep(DELAY2,4) -- sleep wake with radio disabled
     print("woke up!")
     node.restart()
