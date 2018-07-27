@@ -53,10 +53,14 @@ sk:on("sent",function(sck)
     enInt()
     -- go to sleep, wake up 30 secs before report due
     -- local DELAY2 = ((INTERVAL/2)*1000)
-    local DELAY2 = 1000000  -- sleep 1 sec, 
-    node.dsleep(DELAY2,4) -- sleep wake with radio disabled
-    print("woke up!")
-    node.restart()
+    cfg={}
+    cfg.duration=30*1000*1000  -- suspend 30 secs
+    cfg.resume_cb=function() 
+                print("woke up!")
+                node.restart()
+                end
+    cfg.suspend_cb=function() print("WiFi suspended") end
+    wifi.suspend(cfg)
     end)
 --sk:on("disconnection", function(sck)
 --    collectgarbage();

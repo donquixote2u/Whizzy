@@ -14,7 +14,11 @@ CONNECTED=false
             tmr.register(checkwifi,5000,tmr.ALARM_SINGLE,checkWIFI)
             tmr.start(checkwifi)
             wifi.setmode( wifi.STATION )
-            wifi.sta.config( SSID , APPWD)
+            station_cfg={}
+            station_cfg.ssid=SSID
+            station_cfg.pwd=APPWD
+            station_cfg.save=false
+            wifi.sta.config(station_cfg)
             wifi.sleeptype(wifi.MODEM_SLEEP)
             print("Checking WIFI..." .. wifiTrys)
         end
