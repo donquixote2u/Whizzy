@@ -4,21 +4,30 @@
 TSADDR = "184.106.153.149"
 TSKEY="TIWBBVWTOW0KPWL0"
 Ws={} -- init table of stored latest windSpeed vals
-dofile("checkwifi.lua")        -- get wifi connect routines in
--- wait INTERVAL to send data, send, then sleep
-tmr.alarm(2, INTERVAL, 1, function() Send() end )
+dofile("testWifi.lua")        -- get wifi connect routines in
+-- wait 2 min to send data, send, then sleep
+DELAY=120000
+local delayed_call=tmr.create()
+delayed_call:register(DELAY,tmr.ALARM_SINGLE, function() Send() end )
+delayed_call:start()
 -- END --
 
 function Send()
 print("\r\n Send called")
-wifiTrys     = 0      -- Counter of trys to connect to wifi
-checkWIFI()  
- if(CONNECTED~=true) then -- if not connected, resubmit call
-  tmr.alarm( 1, 5000, 0, Send )
- else  
-    sendData()  -- wifi connected, so send data
- end
-end 
+testWifi()  -- returns 0 if connected
+if(wifiTries>0) then -- if not connected and < retry limit, resubmit call in 10 secs
+  if(wifiTries<NUMWIFITRIES) then
+    local delayed_call=tmr.create()
+    delayed_call:register(10000,tmr.ALARM_SINGLE, function() Send() end )
+    delayed_call:start()
+  else print("Failed to Connect")
+       return
+  end        
+else           -- tries = 0, = connected  
+    sendData()  -- so send data
+end
+end
+ 
 function sendData()
 if((Ws~=nil) and (#Ws>0)) then 
   table.sort(Ws)   -- sort elapsed times  and extract median
@@ -51,16 +60,16 @@ sk:on("sent",function(sck)
     sk:close()
     wifi.sta.disconnect()
     enInt()
-    -- go to sleep, wake up 30 secs before report due
-    -- local DELAY2 = ((INTERVAL/2)*1000)
+    -- turn off wireless now that send is done, will resume on reboot
     cfg={}
-    cfg.duration=30*1000*1000  -- suspend 30 secs
-    cfg.resume_cb=function() 
-                print("woke up!")
-                node.restart()
+    cfg.duration=0              -- suspend indefinitely
+    cfg.suspend_cb=function()
+                print("WiFi suspended") 
                 end
-    cfg.suspend_cb=function() print("WiFi suspended") end
     wifi.suspend(cfg)
+    shutdown=tmr.create()
+    shutdown:register(INTERVAL-120000 , tmr.ALARM_SINGLE, function() node.restart() end )
+    shutdown:start()
     end)
 --sk:on("disconnection", function(sck)
 --    collectgarbage();

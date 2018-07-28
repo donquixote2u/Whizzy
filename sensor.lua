@@ -1,12 +1,12 @@
 --- on interrupt from Hall Effect Sensor pin, cal elapsed time since last int
 function calcWindspeed()
-print("\r\ninterrupt triggered")
+-- DEBUG print("\r\ninterrupt triggered")
 msNow=tmr.now();
 if (msLast ~= 0) then
     local Period = msNow-msLast;
     if (Period > 250000) then -- if period not > 1/4 sec, bogus or hurricane!
      msElapsed=Period;
-     print("ms="..msElapsed.."\r\n")
+     -- DEBUG print("ms="..msElapsed.."\r\n")
      if (#Ws > 9) then
         table.remove(Ws,1)   -- if table has full 10 entries, shift off first
      end   
@@ -46,4 +46,6 @@ i2c.setup(id,sda,scl,i2c.SLOW)
 dofile("readcompass.lua")   -- get compass read routines in
 dofile("getadc.lua")        -- get adc read routines in
 -- now load thingspeak send routines, set up xmit loop
-tmr.alarm( 2 , 2500 , 0 ,  function() require("tsclient") end)
+local delayed_call=tmr.create()
+delayed_call:register(2500 ,tmr.ALARM_SINGLE,  function() require("tsclient") end)
+delayed_call:start()
