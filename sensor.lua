@@ -45,7 +45,4 @@ scl=3   -- i2c clock GPIO0
 i2c.setup(id,sda,scl,i2c.SLOW)
 dofile("readcompass.lua")   -- get compass read routines in
 dofile("getadc.lua")        -- get adc read routines in
--- now load thingspeak send routines, set up xmit loop
-local delayed_call=tmr.create()
-delayed_call:register(2500 ,tmr.ALARM_SINGLE,  function() require("tsclient") end)
-delayed_call:start()
+dofile("tsclient.lua")      -- load and run thingspeak send

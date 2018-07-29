@@ -8,17 +8,19 @@ dofile("testWifi.lua")        -- get wifi connect routines in
 -- wait 2 min to send data, send, then sleep
 DELAY=120000
 local delayed_call=tmr.create()
-delayed_call:register(DELAY,tmr.ALARM_SINGLE, function() Send() end )
+cfg={}
+cfg.success_cb=function() sendData() end
+cfg.failure_cb=function(cfg) Retry(cfg) end
+delayed_call:register(DELAY,tmr.ALARM_SINGLE, function() testWifi(cfg) end )
 delayed_call:start()
 -- END --
 
-function Send()
-print("\r\n Send called")
-testWifi()  -- returns 0 if connected
+function Retry(cfg)
+print("\r\n Retry called")
 if(wifiTries>0) then -- if not connected and < retry limit, resubmit call in 10 secs
   if(wifiTries<NUMWIFITRIES) then
     local delayed_call=tmr.create()
-    delayed_call:register(10000,tmr.ALARM_SINGLE, function() Send() end )
+    delayed_call:register(10000,tmr.ALARM_SINGLE, function() testWifi(cfg) end )
     delayed_call:start()
   else print("Failed to Connect")
        return
