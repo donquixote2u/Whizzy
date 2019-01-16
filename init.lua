@@ -1,10 +1,9 @@
 -- Remote Wind Speed/Dir Sensor
 --(send wind speed/dir, batt and pv voltage levels to webserver)
--- manifest: sensor,tsclient,readcompass,getadc,i2c,checkwifi
+-- manifest: sensor,tsclient,readcompass,getadc,i2c,checkwifi,wificredentials
 -- updated to Nodemcu 2.2   26/7/18
  -- Constants
-SSID    = "98FM"
-APPWD   = "potentiometer"
+require_once("wificredentials.lua")
 CMDFILE = "sensor.lua"   -- File that is executed after connection
 -- INTERVAL = 1200000   -- delay before data send; 1200 millisecs=20 min
 INTERVAL = 30000   -- temp delay 30 secs
