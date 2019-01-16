@@ -5,14 +5,15 @@
  -- Constants
 require_once("wificredentials.lua")
 CMDFILE = "sensor.lua"   -- File that is executed after connection
--- INTERVAL = 1200000   -- delay before data send; 1200 millisecs=20 min
-INTERVAL = 30000   -- temp delay 30 secs
+INTERVAL = 1200000   -- delay before data send; 1.2 million millisecs=20 min
 THRESHOLD = 10000000
 CALIBRATION = 10000000
 -- Some control variables
-wifiTrys     = 0      -- Counter of trys to connect to wifi
-NUMWIFITRYS  = 20    -- Maximum number of WIFI Testings while waiting for connection
+wifiTries     = 0      -- Counter of trys to connect to wifi
+NUMWIFITRIES  = 20    -- Maximum number of WIFI Testings while waiting for connection
 CONNECTED = false   -- wifi connect attempt status
-tmr.alarm( 1 , 2500 , 0 , function() dofile(CMDFILE) end )  -- Call main control pgm after timeout
+local delayed_call=tmr.create()
+delayed_call:register(2500 , tmr.ALARM_SINGLE, function() dofile(CMDFILE) end ) -- Call main control pgm after timeout
+delayed_call:start()
 -- Drop through here to let NodeMcu run
 
