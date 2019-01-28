@@ -16,5 +16,7 @@ function testWifi(cfg)
     wifi.sta.config(station_cfg) -- auto connects
     wifi.sleeptype(wifi.MODEM_SLEEP)
     print("Checking WIFI..." .. wifiTries)
-    return cfg.failure_cb(cfg)
+    -- return cfg.retry_cb(cfg)
+    delayed_call:register(10000,tmr.ALARM_SINGLE, function() cfg.retry_cb(cfg) end )
+    delayed_call:start()
 end

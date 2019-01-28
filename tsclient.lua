@@ -7,29 +7,16 @@ Ws={} -- init table of stored latest windSpeed vals
 dofile("testWifi.lua")        -- get wifi connect routines in
 -- wait 2 min to send data, send, then sleep
 DELAY=120000
-local delayed_call=tmr.create()
+-- local delayed_call=tmr.create()
+delayed_call=tmr.create()
 cfg={}
 cfg.success_cb=function() sendData() end
-cfg.failure_cb=function(cfg) Retry(cfg) end
+-- cfg.retry_cb=function(cfg) Retry(cfg) end
+cfg.retry_cb=function(cfg) testWifi(cfg) end
 delayed_call:register(DELAY,tmr.ALARM_SINGLE, function() testWifi(cfg) end )
 delayed_call:start()
 -- END --
 
-function Retry(cfg)
-print("\r\n Retry called")
-if(wifiTries>0) then -- if not connected and < retry limit, resubmit call in 10 secs
-  if(wifiTries<NUMWIFITRIES) then
-    local delayed_call=tmr.create()
-    delayed_call:register(10000,tmr.ALARM_SINGLE, function() testWifi(cfg) end )
-    delayed_call:start()
-  else print("Failed to Connect")
-       return
-  end        
-else           -- tries = 0, = connected  
-    sendData()  -- so send data
-end
-end
- 
 function sendData()
 if((Ws~=nil) and (#Ws>0)) then 
   table.sort(Ws)   -- sort elapsed times  and extract median

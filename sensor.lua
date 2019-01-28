@@ -2,10 +2,9 @@
 function calcWindspeed()
 -- DEBUG print("\r\ninterrupt triggered")
 msNow=tmr.now();
-if (msLast ~= 0) then
-    local Period = msNow-msLast;
-    if (Period > 250000) then -- if period not > 1/4 sec, bogus or hurricane!
-     msElapsed=Period;
+if (msLast ~= 0) then		-- if a revious trigger since last calcs, do calcs
+    local msElapsed = msNow-msLast;
+    if (msElapsed > 250000) then -- if period not > 1/4 sec, bogus or hurricane!
      -- DEBUG print("ms="..msElapsed.."\r\n")
      if (#Ws > 9) then
         table.remove(Ws,1)   -- if table has full 10 entries, shift off first
@@ -30,8 +29,7 @@ function disInt()
 end
 
 -- start here ; set up sensor pin interrupts, comms, send data
-msLast = 0
-msElapsed = 0
+msLast = 0		-- init last trigger time to 0
 SENSEPIN = 1
 Ws = {}  -- init table of latest elapsed times so median can be taken
 enInt()
@@ -45,4 +43,4 @@ scl=3   -- i2c clock GPIO0
 i2c.setup(id,sda,scl,i2c.SLOW)
 dofile("readcompass.lua")   -- get compass read routines in
 dofile("getadc.lua")        -- get adc read routines in
-dofile("tsclient.lua")      -- load and run thingspeak send
+dofile("tsclient2.lua")      -- load and run thingspeak send
