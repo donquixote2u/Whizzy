@@ -1,6 +1,7 @@
 # Whizzy
 ESP8266 Nodemcu control sw for solar/battery powered wind sensor.
 
+** 9/2/19  WIP!  changing for bulk update of  Thingspeak
  Wind Sensor Operation
 
 Whizzy is a remote wind sensor, sending readings via wifi  and http to a collection point, currently set to Thingspeak.com.
