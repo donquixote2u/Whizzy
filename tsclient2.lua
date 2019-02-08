@@ -18,8 +18,8 @@ delayed_call:start()
 -- END --
 
 function sendData()
-local result=calcwsavg()
-windSpeed=string.format("%04.1f",result)
+local Speed=calcwsavg()        -- get avg windspeed
+windSpeed=string.format("%04.1f",Speed)
 windDir=read_compass()
 local Row=#Readings + 1
 Readings[Row]={windSpeed, windDir, PvVolts, BattVolts}		-- insert another row
@@ -38,9 +38,9 @@ else
     conn:send(REQ)
     end)
   sk:on("sent",function(sck)
-    print("Closing connection")
-    sk:close()
-    wifi.sta.disconnect()
+    -- print("Closing connection")
+    -- sk:close()
+    -- wifi.sta.disconnect()
     enInt()
     -- turn off wireless now that send is done, will resume on reboot
     cfg={}
@@ -48,9 +48,10 @@ else
     cfg.suspend_cb=function()
                 print("WiFi suspended") 
                 end
-    wifi.suspend(cfg)
+    -- wifi.suspend(cfg)
     shutdown=tmr.create()
-    shutdown:register(INTERVAL-120000 , tmr.ALARM_SINGLE, function() node.restart() end )
+    -- shutdown:register(INTERVAL-120000 , tmr.ALARM_SINGLE, function() node.restart() end )
+    shutdown:register(10000 , tmr.ALARM_SINGLE, function() wifi.suspend(cfg) end )
     shutdown:start()
     end)				-- end sk:on(sent)
 -- print("\r\n WindDir="..windDir)
@@ -58,20 +59,25 @@ else
 REQBODY0="POST /channels/105927/bulk_update.json"
 REQBODY1= " HTTP/1.1\r\nHost: api.thingspeak.com\r\n"
 REQBODY1a="Connection: keep-alive\r\nkeep-alive: 1\r\nPragma: no-cache\r\n"
-REQBODY1b="Cache-Control: no-cache\r\nContent-Type: application/x-www-form-urlencoded\r\nContent-Length: "
+-- REQBODY1b="Cache-Control: no-cache\r\nContent-Type: application/x-www-form-urlencoded\r\nContent-Length: "
+REQBODY1b="Cache-Control: no-cache\r\nContent-Type: application/json\r\nContent-Length: "
 REQBODY2="\r\nAccept: */*\r\nUser-Agent: Mozilla/4.0 (compatible; esp8266 Lua; Windows NT 5.1)\r\n\r\n"
 -- REQ="GET /"..TSPARMS..REQBODY1..REQBODY2
-JSONHD="{\"write_api_key\":\""..TSKEY.."\",\"updates:["
-JSONTR="]}"
+JSONHD="{\"write_api_key\":\""..TSKEY.."\",\"updates\":[{"
+JSONTR="}]}"
 JSON=""
-for i=1,#READINGS do
+for i=1,#Readings do
      JSON=JSON.."\"delta_t\":1200,"
      for j = 1,4 do 
         local fn=j+2
-        JSON=JSON.."\"field"..fn.."\":\""..READINGS[i][j].."\","
+        JSON=JSON.."\"field"..fn.."\":\""..Readings[i][j].."\""
+        if (j<4) then
+           JSON=JSON..","
+        end   
      end
-    JSON=JSON.."},"     
 end
+JSON=JSONHD..JSON..JSONTR
+jsonLength=JSON:len()
 REQ=REQBODY0..REQBODY1..REQBODY1a..REQBODY1b..jsonLength..REQBODY2..JSON
 print("Req="..REQ.."\r\n");
 sk:connect(80,TSADDR)
@@ -90,7 +96,7 @@ end
 if ((Median < THRESHOLD) and (Median > 0)) then 
   local result = CALIBRATION / Median 
 else
-  Speed = 0  -- if huge elapsed, speed is 0
+  result = 0  -- if huge elapsed, speed is 0
 end
 Ws={}   -- clear readings after send 
 return result
