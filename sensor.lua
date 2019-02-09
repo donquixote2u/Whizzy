@@ -43,4 +43,4 @@ scl=3   -- i2c clock GPIO0
 i2c.setup(id,sda,scl,i2c.SLOW)
 dofile("readcompass.lua")   -- get compass read routines in
 dofile("getadc.lua")        -- get adc read routines in
-dofile("tsclient2.lua")      -- load and run thingspeak send
+dofile("tsclient.lua")      -- load and run thingspeak send

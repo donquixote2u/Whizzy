@@ -6,7 +6,10 @@ function testWifi(cfg)
          wifiTries=0
          return cfg.success_cb()
        end
-    end   
+    end 
+    if (wifi.suspend()==2) then
+       wifi.resume()   -- in case wifi has been suspended  
+    end
     wifiTries = wifiTries + 1
     wifi.setmode( wifi.STATION )
     station_cfg={}
