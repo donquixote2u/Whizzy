@@ -30,35 +30,6 @@ end -- end PvVolt test
 end
 
 function sendData()
-  disInt()   			-- disable interrupts, or they will be corrupted by net module 
-  print("Sending data to "..TSADDR)
-  sk=net.createConnection(net.TCP, 0)
-  sk:on("receive", function(sck, payload)
-    print("received:"..payload)
-    end)
-  sk:on("connection", function(sck)
-    conn=sck
-    print ("Posting "..Speed.."...\r\n");
-    conn:send(REQ)
-    end)
-  sk:on("sent",function(sck)
-    -- print("Closing connection")
-    -- sk:close()
-    -- wifi.sta.disconnect()
-    enInt()
-    -- turn off wireless now that send is done, will resume on reboot
-    cfg={}
-    cfg.duration=0              -- suspend indefinitely
-    cfg.suspend_cb=function()
-                print("WiFi suspended") 
-                end
-    -- wifi.suspend(cfg)
-    shutdown=tmr.create()
-    -- shutdown:register(INTERVAL-120000 , tmr.ALARM_SINGLE, function() node.restart() end )
-    shutdown:register(10000 , tmr.ALARM_SINGLE, function() wifi.suspend(cfg) end )
-    shutdown:start()
-    end)				-- end sk:on(sent)
-
 REQBODY0="POST /channels/105927/bulk_update.json"
 REQBODY1= " HTTP/1.1\r\nHost: api.thingspeak.com\r\n"
 REQBODY1a="Connection: keep-alive\r\nkeep-alive: 1\r\nPragma: no-cache\r\n"
@@ -85,6 +56,34 @@ JSON=JSONHD..JSON..JSONTR
 jsonLength=JSON:len()
 REQ=REQBODY0..REQBODY1..REQBODY1a..REQBODY1b..jsonLength..REQBODY2..JSON
 print("Req="..REQ.."\r\n");
+disInt()   			-- disable interrupts, or they will be corrupted by net module 
+print("Sending data to "..TSADDR)
+  sk=net.createConnection(net.TCP, 0)
+  sk:on("receive", function(sck, payload)
+    print("received:"..payload)
+    end)
+  sk:on("connection", function(sck)
+    conn=sck
+    print ("Posting request\r\n");
+    conn:send(REQ)
+    end)
+  sk:on("sent",function(sck)
+    -- print("Closing connection")
+    -- sk:close()
+    -- wifi.sta.disconnect()
+    enInt()
+    Readings={}     -- clear sent data
+    -- turn off wireless now that send is done, will resume on reboot
+    cfg={}
+    cfg.duration=0              -- suspend indefinitely
+    cfg.suspend_cb=function()
+                print("WiFi suspended") 
+                end
+    shutdown=tmr.create()
+    -- shutdown:register(INTERVAL-120000 , tmr.ALARM_SINGLE, function() node.restart() end )
+    shutdown:register(10000 , tmr.ALARM_SINGLE, function() wifi.suspend(cfg) end )
+    shutdown:start()
+    end)				-- end sk:on(sent)
 sk:connect(80,TSADDR)
 end     -- end sendData func 
 
