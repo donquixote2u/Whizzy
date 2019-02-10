@@ -20,6 +20,5 @@ function testWifi(cfg)
     wifi.sleeptype(wifi.MODEM_SLEEP)
     print("Checking WIFI..." .. wifiTries)
     -- return cfg.retry_cb(cfg)
-    delayed_call:register(10000,tmr.ALARM_SINGLE, function() cfg.retry_cb(cfg) end )
-    delayed_call:start()
+    wifi_timer:alarm(10000,tmr.ALARM_SINGLE, function() cfg.retry_cb(cfg) end )
 end

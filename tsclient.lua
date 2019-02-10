@@ -1,7 +1,6 @@
 -- Get data and send to host web server
 -- rev 2 uses bulk update json file, as updates may be deferred if charge volts low
--- model - https://api.thingspeak.com/update?api_key=TIWBBVWTOW0KPWL0&field4=0001
--- START HERE
+-- https://au.mathworks.com/help/thingspeak/bulkwritejsondata.html-- START HERE
 -- print("\r\n webclient entered")
 TSADDR = "184.106.153.149"
 TSKEY="TIWBBVWTOW0KPWL0"
@@ -10,9 +9,9 @@ Readings={} -- init table of stored readings
 dofile("testWifi.lua")        -- get wifi connect routines in
 -- wait 2 min to send data, send, then sleep
 DELAY=120000
--- local delayed_call=tmr.create()
-delayed_call=tmr.create()
-delayed_call:alarm(DELAY,tmr.ALARM_SINGLE, function() saveData() end )
+wifi_timer=tmr.create()
+data_timer=tmr.create()
+data_timer:alarm(DELAY,tmr.ALARM_SINGLE, function() saveData() end )
 -- END --
 
 function saveData()
@@ -25,8 +24,9 @@ if (PvVolts>3) then     -- if charge voltage ok, send data else skip
    cfg={}
    cfg.success_cb=function() sendData() end
    cfg.retry_cb=function(cfg) testWifi(cfg) end
-   delayed_call:alarm(DELAY,tmr.ALARM_SINGLE, function() testWifi(cfg) end )
-end -- end PvVolt test
+   wifi_timer:alarm(1000,tmr.ALARM_SINGLE, function() testWifi(cfg) end )
+end -- end PvVolt test, now set timer to recall data send
+data_timer:alarm(INTERVAL-DELAY,tmr.ALARM_SINGLE, function() saveData() end )
 end
 
 function sendData()
@@ -79,10 +79,8 @@ print("Sending data to "..TSADDR)
     cfg.suspend_cb=function()
                 print("WiFi suspended") 
                 end
-    shutdown=tmr.create()
-    -- shutdown:register(INTERVAL-120000 , tmr.ALARM_SINGLE, function() node.restart() end )
-    shutdown:register(10000 , tmr.ALARM_SINGLE, function() wifi.suspend(cfg) end )
-    shutdown:start()
+    -- suspend wifi after enough time for send response            
+    wifi_timer:alarm(10000 , tmr.ALARM_SINGLE, function() wifi.suspend(cfg) end )
     end)				-- end sk:on(sent)
 sk:connect(80,TSADDR)
 end     -- end sendData func 
