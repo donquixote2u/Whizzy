@@ -7,17 +7,22 @@ TSKEY="TIWBBVWTOW0KPWL0"
 Ws={} -- init table of stored latest windSpeed vals
 Readings={} -- init table of stored readings
 dofile("testWifi.lua")        -- get wifi connect routines in
--- wait 2 min to send data, send, then sleep
-DELAY=120000
+-- wait 10s to send data, send, then sleep
+DELAY=10000
 wifi_timer=tmr.create()
 data_timer=tmr.create()
-data_timer:alarm(DELAY,tmr.ALARM_SINGLE, function() saveData() end )
+data_timer:alarm(DELAY,tmr.ALARM_SINGLE, function() getData() end )
 -- END --
-
-function saveData()
+function getData()
+getadc()    -- get PV, Batt voltages
 local Speed=calcwsavg()        -- get avg windspeed
 windSpeed=string.format("%04.1f",Speed)
 windDir=read_compass()
+DELAY=(2*period)+500 -- allow time for completeion of reads
+data_timer:alarm(DELAY,tmr.ALARM_SINGLE, function() saveData() end )
+end
+
+function saveData()
 local Row=#Readings + 1     -- save readings for sending 
 Readings[Row]={windSpeed, windDir, PvVolts, BattVolts}        -- insert another row
 if (PvVolts>3) then     -- if charge voltage ok, send data else skip
@@ -26,7 +31,7 @@ if (PvVolts>3) then     -- if charge voltage ok, send data else skip
    cfg.retry_cb=function(cfg) testWifi(cfg) end
    wifi_timer:alarm(1000,tmr.ALARM_SINGLE, function() testWifi(cfg) end )
 end -- end PvVolt test, now set timer to recall data send
-data_timer:alarm(INTERVAL-DELAY,tmr.ALARM_SINGLE, function() saveData() end )
+data_timer:alarm(INTERVAL-DELAY,tmr.ALARM_SINGLE, function() getData() end )
 end
 
 function sendData()
@@ -39,7 +44,7 @@ JSONHD="{\"write_api_key\":\""..TSKEY.."\",\"updates\":["
 JSONTR="]}"
 JSON=""
 for i=1,#Readings do
-     JSON=JSON.."{\"delta_t\":"..(i*1200)..","
+     JSON=JSON.."{\"delta_t\":"..(((#Readings-i)+1)*1200)..","
      for j = 1,4 do 
         local fn=j+2
         JSON=JSON.."\"field"..fn.."\":\""..Readings[i][j].."\""

@@ -1,4 +1,5 @@
 -- reads 2 analogue voltages (Batt/Solar) via i2c from attiny85 adc
+function getadc()
 att_adr=0x13 --attiny adc
 period=10000   -- allow time to check 2 sensors before xmit
 adc2delay=tmr.create()
@@ -23,4 +24,4 @@ tmr.register(adc2delay,period,tmr.ALARM_SINGLE,function()
     tmr.start(adc3delay)    
     end)
 tmr.start(adc2delay)
-
+end
