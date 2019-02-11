@@ -1,7 +1,7 @@
 -- reads 2 analogue voltages (Batt/Solar) via i2c from attiny85 adc
 function getadc()
 att_adr=0x13 --attiny adc
-period=10000   -- allow time to check 2 sensors before xmit
+period=5000   -- allow time to check 2 sensors before xmit
 adc2delay=tmr.create()
 adc3delay=tmr.create()
 write_i2c(att_adr,0x00,2) -- write # of adc to be sampled into reg 0 to start sampling

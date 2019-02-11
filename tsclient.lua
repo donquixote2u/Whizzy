@@ -18,13 +18,13 @@ getadc()    -- get PV, Batt voltages
 local Speed=calcwsavg()        -- get avg windspeed
 windSpeed=string.format("%04.1f",Speed)
 windDir=read_compass()
-DELAY=(2*period)+500 -- allow time for completeion of reads
+DELAY=(2*period)+500 -- allow time for completion of reads
 data_timer:alarm(DELAY,tmr.ALARM_SINGLE, function() saveData() end )
 end
 
 function saveData()
 local Row=#Readings + 1     -- save readings for sending 
-Readings[Row]={windSpeed, windDir, PvVolts, BattVolts}        -- insert another row
+Readings[Row]={windSpeed, windDir, BattVolts, PvVolts }        -- insert another row
 if (PvVolts>3) then     -- if charge voltage ok, send data else skip
    cfg={}
    cfg.success_cb=function() sendData() end
@@ -44,7 +44,7 @@ JSONHD="{\"write_api_key\":\""..TSKEY.."\",\"updates\":["
 JSONTR="]}"
 JSON=""
 for i=1,#Readings do
-     JSON=JSON.."{\"delta_t\":"..(((#Readings-i)+1)*1200)..","
+     JSON=JSON.."{\"delta_t\":"..(((#Readings-i)+1)*(INTERVAL/1000))..","
      for j = 1,4 do 
         local fn=j+2
         JSON=JSON.."\"field"..fn.."\":\""..Readings[i][j].."\""

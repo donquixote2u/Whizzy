@@ -5,7 +5,7 @@
  -- Constants
 require("wificredentials")
 CMDFILE = "sensor.lua"   -- File that is executed after connection
-INTERVAL = 1200000   -- delay before data send; 1.2 million millisecs=20 min
+INTERVAL = 120000   -- delay before data send; 1.2 million millisecs=20 min
 THRESHOLD = 10000000
 CALIBRATION = 10000000
 -- Some control variables
