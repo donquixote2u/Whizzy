@@ -13,10 +13,33 @@ wifi_timer=tmr.create()
 data_timer=tmr.create()
 data_timer:alarm(DELAY,tmr.ALARM_SINGLE, function() getData() end )
 -- END --
+
+function calcwsavg()
+if((Ws~=nil) and (#Ws>0)) then 
+  table.sort(Ws)   -- sort elapsed times  and extract median
+  Middle=math.ceil(#Ws/2)  -- get val from middle of array
+  Median = Ws[Middle]
+  -- DEBUG   print("Median="..Median.."\r\n")
+else
+  Median=0
+end  
+if ((Median < THRESHOLD) and (Median > 0)) then 
+  result = CALIBRATION / Median 
+else
+  result = 0  -- if huge elapsed, speed is 0
+end
+Ws={}   -- clear readings after send 
+return result
+end
+
 function getData()
 getadc()    -- get PV, Batt voltages
 local Speed=calcwsavg()        -- get avg windspeed
-windSpeed=string.format("%04.1f",Speed)
+if ((Speed~=0) and (Speed ~= nil)) then
+   windSpeed=string.format("%04.1f",Speed)
+else   
+   windSpeed=0
+end
 windDir=read_compass()
 DELAY=(2*period)+500 -- allow time for completion of reads
 data_timer:alarm(DELAY,tmr.ALARM_SINGLE, function() saveData() end )
@@ -25,7 +48,8 @@ end
 function saveData()
 local Row=#Readings + 1     -- save readings for sending 
 Readings[Row]={windSpeed, windDir, BattVolts, PvVolts }        -- insert another row
-if (PvVolts>3) then     -- if charge voltage ok, send data else skip
+if ((PvVolts>3) or (#Readings>3)) then     -- if charge voltage ok, send data else skip
+   disInt()            -- disable interrupts, or they will be corrupted by net module 
    cfg={}
    cfg.success_cb=function() sendData() end
    cfg.retry_cb=function(cfg) testWifi(cfg) end
@@ -61,7 +85,6 @@ JSON=JSONHD..JSON..JSONTR
 jsonLength=JSON:len()
 REQ=REQBODY0..REQBODY1..REQBODY1a..REQBODY1b..jsonLength..REQBODY2..JSON
 print("Req="..REQ.."\r\n");
-disInt()   			-- disable interrupts, or they will be corrupted by net module 
 print("Sending data to "..TSADDR)
   sk=net.createConnection(net.TCP, 0)
   sk:on("receive", function(sck, payload)
@@ -76,34 +99,18 @@ print("Sending data to "..TSADDR)
     -- print("Closing connection")
     -- sk:close()
     -- wifi.sta.disconnect()
-    enInt()
-    Readings={}     -- clear sent data
     -- turn off wireless now that send is done, will resume on reboot
     cfg={}
     cfg.duration=0              -- suspend indefinitely
     cfg.suspend_cb=function()
-                print("WiFi suspended") 
-                end
+      enInt()
+      Readings={}     -- clear sent data
+      print("WiFi suspended") 
+      end
     -- suspend wifi after enough time for send response            
     wifi_timer:alarm(10000 , tmr.ALARM_SINGLE, function() wifi.suspend(cfg) end )
     end)				-- end sk:on(sent)
 sk:connect(80,TSADDR)
 end     -- end sendData func 
 
-function calcwsavg()
-if((Ws~=nil) and (#Ws>0)) then 
-  table.sort(Ws)   -- sort elapsed times  and extract median
-  Middle=math.ceil(#Ws/2)  -- get val from middle of array
-  Median = Ws[Middle]
-  -- print("Median="..Median.."\r\n")
-else
-  Median=0
-end  
-if ((Median < THRESHOLD) and (Median > 0)) then 
-  local result = CALIBRATION / Median 
-else
-  result = 0  -- if huge elapsed, speed is 0
-end
-Ws={}   -- clear readings after send 
-return result
-end
+

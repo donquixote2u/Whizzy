@@ -5,10 +5,11 @@ msNow=tmr.now();
 if (msLast ~= 0) then		-- if a revious trigger since last calcs, do calcs
     local msElapsed = msNow-msLast;
     if (msElapsed > 250000) then -- if period not > 1/4 sec, bogus or hurricane!
-     -- DEBUG print("ms="..msElapsed.."\r\n")
      if (#Ws > 9) then
         table.remove(Ws,1)   -- if table has full 10 entries, shift off first
-     end   
+     end 
+     -- DEBUG      
+     print("ms="..msElapsed.."\r\n")  
      table.insert(Ws,msElapsed)
      msLast=msNow; -- save reading as Last
    end

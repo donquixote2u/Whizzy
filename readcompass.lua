@@ -15,12 +15,13 @@ function read_compass()
 -- get contents of all 6 data registers
 result = read_i2c(compass_adr, 0x03, 6)
 -- show contents in hex, convert to signed 16-bit integers
-print("read:")
-for i=1,6,1 do print(string.format("%02X",string.byte(result,i))) end
+-- print("read:")
+-- for i=1,6,1 do 
+-- print(string.format("%02X",string.byte(result,i))) end
 x=reg2int(string.byte(result, 1),string.byte(result, 2))
 z=reg2int(string.byte(result, 3),string.byte(result, 4))
 y=reg2int(string.byte(result, 5),string.byte(result, 6))
-print("heading:"..x..";"..z..";"..y)
+-- print("heading:"..x..";"..z..";"..y)
 tmp=y-x
 bearing="unresolved"
 --tmp=round((2*math.atanf(y,x)-3),0)

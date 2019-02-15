@@ -8,6 +8,7 @@ write_i2c(att_adr,0x00,2) -- write # of adc to be sampled into reg 0 to start sa
 tmr.register(adc2delay,period,tmr.ALARM_SINGLE,function()
      -- get reg 2 = adc3 = pv panels
     PvVolts=string.format("%02d",string.byte(read_i2c(att_adr, 2, 1)))/1.4 
+    -- DEBUG 
     print("\r\n PvVolts="..PvVolts)
     write_i2c(att_adr,0x00,3)
     -- don;t start next sample until first done
@@ -19,6 +20,7 @@ tmr.register(adc2delay,period,tmr.ALARM_SINGLE,function()
         --      byte=string.byte(read_i2c(att_adr, i, 1),1)
         --      print(string.format("%02X",byte))
         -- end
+        -- DEBUG 
         print("\r\n BattVolts="..BattVolts)
         end)
     tmr.start(adc3delay)    
