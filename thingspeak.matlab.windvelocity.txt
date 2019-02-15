@@ -1,16 +1,12 @@
-% Read wind speed and direction from a ThingSpeak channel and visualize
-% wind velocity using the MATLAB COMPASS plot function.
-
-% Channel 12397 contains data from the MathWorks Weather Station, located
-% in Natick, Massachusetts. The data is collected once every minute. Field
-% 1 contains wind direction data and field 2 contains wind speed data.
-
+% Read wind speed and direction from the ThingSpeak channel and visualize
+% wind velocity using the MATLAB COMPASS plot function. (copied from MATLAB example)
+% (go to https://thingspeak.com/apps/matlab_visualizations to create app by c&p this code)
 % Channel ID to read data from
-readChannelID = 12397;
+readChannelID = 105927;
 % Wind Direction Field ID
-WindDirFieldID = 1;
+WindDirFieldID = 4;
 % Wind Speed Field ID
-WindSpeedFieldID = 2;
+WindSpeedFieldID = 3;
 
 % Channel Read API Key 
 % If your channel is private, then enter the read API
@@ -38,4 +34,4 @@ u = cos(rad) .* windSpeed; % x coordinate of wind speed on circular plot
 v = sin(rad) .* windSpeed; % y coordinate of wind speed on circular plot
 
 % Generate a compass plot
-compass(u,v);
+compass(u,v);;
