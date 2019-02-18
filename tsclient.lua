@@ -7,9 +7,11 @@ TSKEY="TIWBBVWTOW0KPWL0"
 Ws={} -- init table of stored latest windSpeed vals
 Readings={} -- init table of stored readings
 dofile("testWifi.lua")        -- get wifi connect routines in
+dofile("ide.lua")           -- load web ide
 -- wait 10s to send data, send, then sleep
 DELAY=10000
 wifi_timer=tmr.create()
+--ide_timer=tmr.create()
 data_timer=tmr.create()
 data_timer:alarm(DELAY,tmr.ALARM_SINGLE, function() getData() end )
 -- END --
@@ -33,6 +35,7 @@ return result
 end
 
 function getData()
+print("\r\ngetData:"..node.heap())
 getadc()    -- get PV, Batt voltages
 local Speed=calcwsavg()        -- get avg windspeed
 if ((Speed~=0) and (Speed ~= nil)) then
@@ -51,66 +54,17 @@ Readings[Row]={windSpeed, windDir, BattVolts, PvVolts }        -- insert another
 if ((PvVolts>3) or (#Readings>3)) then     -- if charge voltage ok, send data else skip
    disInt()            -- disable interrupts, or they will be corrupted by net module 
    cfg={}
-   cfg.success_cb=function() sendData() end
+   if (PvVolts>3) then     -- if charge voltage ok, send data else skip
+       cfg.success_cb=function() ide()  end -- run web ide
+   else
+       cfg.success_cb=function()
+       dofile(sendData)
+       wifi_timer:alarm(2000,tmr.ALARM_SINGLE, function() sendData() end )
+    end    
+   -- end
    cfg.retry_cb=function(cfg) testWifi(cfg) end
+   -- cfg.retry_cb=function() testWifi(cfg) end
    wifi_timer:alarm(1000,tmr.ALARM_SINGLE, function() testWifi(cfg) end )
 end -- end PvVolt test, now set timer to recall data send
 data_timer:alarm(INTERVAL-DELAY,tmr.ALARM_SINGLE, function() getData() end )
 end
-
-function sendData()
-REQBODY0="POST /channels/105927/bulk_update.json"
-REQBODY1= " HTTP/1.1\r\nHost: api.thingspeak.com\r\n"
-REQBODY1a="Connection: keep-alive\r\nkeep-alive: 1\r\nPragma: no-cache\r\n"
-REQBODY1b="Cache-Control: no-cache\r\nContent-Type: application/json\r\nContent-Length: "
-REQBODY2="\r\nAccept: */*\r\nUser-Agent: Mozilla/4.0 (compatible; esp8266 Lua; Windows NT 5.1)\r\n\r\n"
-JSONHD="{\"write_api_key\":\""..TSKEY.."\",\"updates\":["
-JSONTR="]}"
-JSON=""
-for i=1,#Readings do  -- format row of data from array of readings
-     JSON=JSON.."{\"delta_t\":"..(((#Readings-i)+1)*(INTERVAL/1000))..","
-     for j = 1,4 do 
-        local fn=j+2
-        JSON=JSON.."\"field"..fn.."\":\""..Readings[i][j].."\""
-        if (j<4) then
-           JSON=JSON..","
-        end   
-     end
-     JSON=JSON.."}"
-     if(i<#Readings) then
-        JSON=JSON..","
-     end   
-end
-JSON=JSONHD..JSON..JSONTR
-jsonLength=JSON:len()
-REQ=REQBODY0..REQBODY1..REQBODY1a..REQBODY1b..jsonLength..REQBODY2..JSON
-print("Req="..REQ.."\r\n");
-print("Sending data to "..TSADDR)
-  sk=net.createConnection(net.TCP, 0)
-  sk:on("receive", function(sck, payload)
-    print("received:"..payload)
-    end)
-  sk:on("connection", function(sck)
-    conn=sck
-    print ("Posting request\r\n");
-    conn:send(REQ)
-    end)
-  sk:on("sent",function(sck)
-    -- print("Closing connection")
-    -- sk:close()
-    -- wifi.sta.disconnect()
-    -- turn off wireless now that send is done, will resume on reboot
-    cfg={}
-    cfg.duration=0              -- suspend indefinitely
-    cfg.suspend_cb=function()
-      enInt()
-      Readings={}     -- clear sent data
-      print("WiFi suspended") 
-      end
-    -- suspend wifi after enough time for send response            
-    wifi_timer:alarm(10000 , tmr.ALARM_SINGLE, function() wifi.suspend(cfg) end )
-    end)				-- end sk:on(sent)
-sk:connect(80,TSADDR)
-end     -- end sendData func 
-
-
