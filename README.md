@@ -1,6 +1,8 @@
 # Whizzy
 ESP8266 Nodemcu control sw for solar/battery powered wind sensor.
 
+
+** 23/2/19 WIP!  DO NOT USE **
 **  9/2/19   changed for bulk  json update of  Thingspeak
  Wind Sensor Operation
 

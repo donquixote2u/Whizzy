@@ -11,6 +11,7 @@ http://<mcu_ip>/newfile.lua?run   it will run the specified script and will show
 --]]
 function ide()
 if (srv==nil) then
+ -- print("listening at " .. wifi.sta.getip() .. ", free: " .. node.heap())
  srv = net.createServer(net.TCP)
 end
 srv:listen(80, function(conn)
@@ -194,4 +195,3 @@ srv:listen(80, function(conn)
 end)
 
 end
--- print("listening at " .. wifi.sta.getip() .. ", free: " .. node.heap())

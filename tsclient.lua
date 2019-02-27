@@ -3,11 +3,11 @@
 -- https://au.mathworks.com/help/thingspeak/bulkwritejsondata.html-- START HERE
 -- print("\r\n webclient entered")
 TSADDR = "184.106.153.149"
+DBGADDR = "35.184.205.108"
 TSKEY="TIWBBVWTOW0KPWL0"
 Ws={} -- init table of stored latest windSpeed vals
 Readings={} -- init table of stored readings
 dofile("testWifi.lua")        -- get wifi connect routines in
-dofile("ide.lua")           -- load web ide
 -- wait 10s to send data, send, then sleep
 DELAY=10000
 wifi_timer=tmr.create()
@@ -35,7 +35,6 @@ return result
 end
 
 function getData()
-print("\r\ngetData:"..node.heap())
 getadc()    -- get PV, Batt voltages
 local Speed=calcwsavg()        -- get avg windspeed
 if ((Speed~=0) and (Speed ~= nil)) then
@@ -54,16 +53,11 @@ Readings[Row]={windSpeed, windDir, BattVolts, PvVolts }        -- insert another
 if ((PvVolts>3) or (#Readings>3)) then     -- if charge voltage ok, send data else skip
    disInt()            -- disable interrupts, or they will be corrupted by net module 
    cfg={}
-   if (PvVolts>3) then     -- if charge voltage ok, send data else skip
-       cfg.success_cb=function() ide()  end -- run web ide
-   else
-       cfg.success_cb=function()
-       dofile(sendData)
-       wifi_timer:alarm(2000,tmr.ALARM_SINGLE, function() sendData() end )
-    end    
-   -- end
+   cfg.success_cb=function()
+   require("sendDiag")
+   wifi_timer:alarm(2000,tmr.ALARM_SINGLE, function() sendData() end )
+   end
    cfg.retry_cb=function(cfg) testWifi(cfg) end
-   -- cfg.retry_cb=function() testWifi(cfg) end
    wifi_timer:alarm(1000,tmr.ALARM_SINGLE, function() testWifi(cfg) end )
 end -- end PvVolt test, now set timer to recall data send
 data_timer:alarm(INTERVAL-DELAY,tmr.ALARM_SINGLE, function() getData() end )

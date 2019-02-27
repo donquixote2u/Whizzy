@@ -46,6 +46,3 @@ end
 -- print("Direction:"..bearing)
 return bearing
 end
-
-
- 
