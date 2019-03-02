@@ -9,7 +9,7 @@ if (msLast ~= 0) then		-- if a revious trigger since last calcs, do calcs
         table.remove(Ws,1)   -- if table has full 10 entries, shift off first
      end 
      -- DEBUG      
-     debug("ms="..msElapsed.."\r\n")  
+     diag("ms="..msElapsed.."\r\n")  
      table.insert(Ws,msElapsed)
      msLast=msNow; -- save reading as Last
    end
@@ -29,7 +29,7 @@ function disInt()
      gpio.mode(SENSEPIN, gpio.INPUT)
 end
 
-function debug(txt)
+function diag(txt)
 if(#msg>98) then
   table.remove(msg,1) -- drop oldest msg table entry
 end

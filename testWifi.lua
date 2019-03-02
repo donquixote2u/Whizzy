@@ -1,4 +1,5 @@
 function testWifi(cfg)
+    diag("test wifi"..wifiTries)
     if (wifiTries > 0) then -- 0 = first time thru, dont check status just try connect
        ipAddr = wifi.sta.getip()
        if ( ( ipAddr ~= nil ) and ( ipAddr ~= "0.0.0.0" ) )then
@@ -8,6 +9,7 @@ function testWifi(cfg)
        end
     end 
     if (wifi.suspend()==2) then
+       diag("wifi resumed")
        wifi.resume()   -- in case wifi has been suspended  
     end
     wifiTries = wifiTries + 1

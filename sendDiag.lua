@@ -1,4 +1,5 @@
 function sendData()
+diag("senddiags"..node.heap())
 REQ="POST /Debug/Showdiags.php"
 REQ=REQ.." HTTP/1.1\r\nHost: api.thingspeak.com\r\n"
 REQ=REQ.."Connection: keep-alive\r\nkeep-alive: 1\r\nPragma: no-cache\r\n"
@@ -17,11 +18,11 @@ addr=DBGADDR
 Connect()
 end -- end sendData func
 function Connect()
-debug("Req="..REQ.."\r\n");
-debug("Sending data to "..addr)
+diag("Req="..REQ.."\r\n");
+diag("Sending data to "..addr)
   sk=net.createConnection(net.TCP, 0)
   sk:on("receive", function(socket, packet)
-    debug("received:"..packet)
+    print("received:"..packet)
     end)
   sk:on("connection", function(socket)
     pocket=socket
@@ -37,8 +38,9 @@ debug("Sending data to "..addr)
     ws_cfg.duration=0              -- suspend indefinitely
     ws_cfg.suspend_cb=function()
       enInt()
+      msg={}
       Readings={}     -- clear sent data
-      debug("WiFi suspended") 
+      diag("WiFi suspend scheduled") 
       end
     -- suspend wifi after enough time for send response            
     wifi_timer:alarm(10000 , tmr.ALARM_SINGLE, function() wifi.suspend(ws_cfg) end )
