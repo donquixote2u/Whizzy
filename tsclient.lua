@@ -54,7 +54,7 @@ if ((PvVolts>3) or (#Readings>3)) then     -- if charge voltage ok, send data el
    disInt()            -- disable interrupts, or they will be corrupted by net module 
    cfg={}
    cfg.success_cb=function()
-   require("sendDiag")
+   require("sendData")
    wifi_timer:alarm(2000,tmr.ALARM_SINGLE, function() sendData() end )
    end
    cfg.retry_cb=function(cfg) testWifi(cfg) end

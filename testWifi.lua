@@ -1,7 +1,7 @@
 function testWifi(cfg)
-    diag("test wifi"..wifiTries)
     if (wifiTries > 0) then -- 0 = first time thru, dont check status just try connect
        ipAddr = wifi.sta.getip()
+       diag("test wifi"..ipAddr)
        if ( ( ipAddr ~= nil ) and ( ipAddr ~= "0.0.0.0" ) )then
          print("Wifi STA connected. IP:"..ipAddr)
          wifiTries=0

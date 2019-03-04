@@ -34,7 +34,7 @@ if(#msg>98) then
   table.remove(msg,1) -- drop oldest msg table entry
 end
 table.insert(msg,txt)
-print(txt)
+-- DEBUG print(txt)
 end
 -- start here ; set up sensor pin interrupts, comms, send data
 msLast = 0		-- init last trigger time to 0
