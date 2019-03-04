@@ -70,8 +70,9 @@ function sendReadings()
  Connect(exitConnect)
 end
 function clearSend()
- enInt()
  Readings={}     -- clear sent data
+ wifiSuspend()
+ enInt()
 end
 function sendData()
   sendDiags()
@@ -80,8 +81,9 @@ function Connect(arg)
  local exitConnect=arg 
  REQ=REQ..datablock:len().."\r\nAccept: */*\r\nUser-Agent: Mozilla/4.0 (compatible; esp8266 Lua; Windows NT 5.1)\r\n\r\n"
  REQ=REQ..datablock
+ datablock=""      -- release string memory
  print("Req="..REQ.."\r\n");
- print("Sending data to "..addr)
+ print("Sending data to "..addr..":"..node.heap())
   sk=net.createConnection(net.TCP, 0)
   sk:on("receive", function(socket, packet)
     print("received: "..packet)
@@ -90,8 +92,10 @@ function Connect(arg)
     pocket=socket
     print ("Posting request\r\n");
     pocket:send(REQ)
+    REQ=""          -- release string memory
     end)
   sk:on("sent",function(socket)
+   print("packet sent") 
    wifi_timer:alarm(10000 , tmr.ALARM_SINGLE, function() exitConnect() end )
   end)                -- end sk:on(sent)
   sk:connect(80,addr)

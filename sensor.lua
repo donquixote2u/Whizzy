@@ -8,8 +8,7 @@ if (msLast ~= 0) then		-- if a revious trigger since last calcs, do calcs
      if (#Ws > 9) then
         table.remove(Ws,1)   -- if table has full 10 entries, shift off first
      end 
-     -- DEBUG      
-     diag("ms="..msElapsed.."\r\n")  
+     -- DEBUG       diag("ms="..msElapsed.."\r\n")  
      table.insert(Ws,msElapsed)
      msLast=msNow; -- save reading as Last
    end
@@ -34,7 +33,8 @@ if(#msg>98) then
   table.remove(msg,1) -- drop oldest msg table entry
 end
 table.insert(msg,txt)
--- DEBUG print(txt)
+-- DEBUG 
+print(txt)
 end
 -- start here ; set up sensor pin interrupts, comms, send data
 msLast = 0		-- init last trigger time to 0
